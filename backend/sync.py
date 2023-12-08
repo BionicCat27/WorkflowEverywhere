@@ -3,12 +3,18 @@ import os
 import shutil
 import threading
 import time
+from dotenv import load_dotenv
 import requests
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-CONFIG_FILE_NAME = "./config.json"
+# Environment variables
+CONFIG_LOCATION = os.getenv('CONFIG_LOCATION')
+load_dotenv()
+
+# Global Variables
+CONFIG_LOCATION = os.path.expanduser(CONFIG_LOCATION)
 INTELLIJ_TARGET = ""
 VSCODE_KEYBINDINGS_PATH = os.path.expanduser("~/Library/Application Support/Code/User")
 VSCODE_TARGET_FILENAME = "keybindings.json"
@@ -26,7 +32,7 @@ def checkBackups():
 def shortcuts():
     checkBackups()
     if request.method == "PUT":
-        with open(CONFIG_FILE_NAME, "w") as configFile:
+        with open(CONFIG_LOCATION, "w") as configFile:
             json.dump(request.get_json(), configFile, indent=2)
         updateShortcutFiles()
         return "Config Successfully Updated", 200
@@ -45,7 +51,7 @@ def addShortcut():
         return f"Must contain following keys: {missing_keys}", 400
     new_shortcut = {expected_key: request_shortcut[expected_key] for expected_key in EXPECTED_SHORTCUT_KEYS}
     config.append(new_shortcut)
-    with open(CONFIG_FILE_NAME, "w") as configFile:
+    with open(CONFIG_LOCATION, "w") as configFile:
         json.dump(config, configFile, indent=2)
     updateShortcutFiles()
     return "Shortcut successfully added", 200
@@ -64,9 +70,9 @@ def healthcheck():
 
 def getCurrentConfig():
     mode = "r"
-    if not os.path.exists(CONFIG_FILE_NAME):
+    if not os.path.exists(CONFIG_LOCATION):
         mode = "w"
-    with open(CONFIG_FILE_NAME, mode) as configFile:
+    with open(CONFIG_LOCATION, mode) as configFile:
         raw_config = configFile.read()
         if raw_config == "" or raw_config == None:
             raw_config = []

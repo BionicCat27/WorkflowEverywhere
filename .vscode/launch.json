@@ -17,8 +17,9 @@
             "type": "python",
             "request": "launch",
             "module": "flask",
+            "cwd": "${workspaceRoot}/backend",
             "env": {
-                "FLASK_APP": "backend/sync.py",
+                "FLASK_APP": "sync.py",
                 "FLASK_DEBUG": "1"
             },
             "args": [
