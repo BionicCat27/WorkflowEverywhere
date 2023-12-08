@@ -38,6 +38,13 @@ def test():
         "test2": "test"
     }
     result = requests.post(f"{HOST}/shortcuts/add", json=data)
+    assert result.status_code == 400
+    data = {
+        "name": "Open Settings",
+        "intellij": "",
+        "vscode": ""
+    }
+    result = requests.post(f"{HOST}/shortcuts/add", json=data)
     assert result.status_code == 200
     result = requests.get(f"{HOST}/shortcuts")
     assert result.status_code == 200

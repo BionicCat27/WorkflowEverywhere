@@ -22,14 +22,17 @@ def shortcuts():
 @app.route("/shortcuts/add", methods=['POST'])
 def addShortcut():
     config = getCurrentConfig()
-    new_shortcut = json.dumps(request.get_json())
-    config.append({
-        "name": "",
-        "vscode": "",
-        "intellij": "",
-    })
+    request_shortcut = request.get_json()
+    new_shortcut ={}
+    expected_keys = ['name', 'vscode', 'intellij']
+    missing_keys = []
+    missing_keys = [key for key in expected_keys if key not in request_shortcut]
+    if len(missing_keys) > 0:
+        return f"Must contain following keys: {missing_keys}", 400
+    new_shortcut = {expected_key: request_shortcut[expected_key] for expected_key in expected_keys}
+    config.append(new_shortcut)
     with open(CONFIG_FILE_NAME, "w") as configFile:
-        configFile.write(config)
+        json.dump(config, configFile, indent=2)
     return "Shortcut successfully added", 200
 
 @app.route("/healthcheck", methods = ['GET'])
