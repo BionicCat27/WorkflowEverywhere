@@ -1,4 +1,5 @@
 import json
+import time
 import requests
 
 HOST = "http://127.0.0.1:5000"
@@ -39,18 +40,31 @@ def test():
     }
     result = requests.post(f"{HOST}/shortcuts/add", json=data)
     assert result.status_code == 400
+
+    print("Clearing config")
+    result = requests.put(f"{HOST}/shortcuts", json=[])
+    assert result.status_code == 200
+    
     data = {
-        "name": "Open Settings",
+        "name": "Open command picker",
         "intellij": "",
-        "vscode": ""
+        "key": "shift+cmd+p",
+        "vscode": "workbench.action.showCommands",
+        "when": "editorTextFocus && !editorReadonly"
     }
     result = requests.post(f"{HOST}/shortcuts/add", json=data)
     assert result.status_code == 200
     result = requests.get(f"{HOST}/shortcuts")
     assert result.status_code == 200
     content = json.loads(result.content)
-    assert len(content) == 2
+    assert len(content) == 1
 
+    print("Waiting for testing time")
+    time.sleep(10)
+    print("Loading backups")
+    result = requests.post(f"{HOST}/loadbackups")
+    assert result.status_code == 200
+    
     print("Finished tests")
 
 if __name__ == "__main__":
